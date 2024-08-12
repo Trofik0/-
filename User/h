@@ -1,0 +1,21 @@
+#ifndef USER_H
+#define USER_H
+
+#include <string>
+using namespace std;
+
+// Класс пользователя
+template <typename T>
+class User {
+public:
+    string login;
+    string password;
+    string name;
+
+    User(string login, string password, string name) {
+        this->login = login;
+        this->password = password;
+        this->name = name;
+    }
+};
+#endif // USER_H
