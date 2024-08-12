@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <exception>
 #include <mutex>
+using namespace std;
+
 
 // Исключение для ошибок аутентификации
-class AuthenticationException : public std::exception {
+class AuthenticationException : public exception {
 public:
     const char* what() const noexcept override {
         return "Ошибка аутентификации пользователя.";
@@ -14,7 +16,7 @@ public:
 };
 
 // Исключение для ошибок отправки сообщения
-class MessageSendingException : public std::exception {
+class MessageSendingException : public exception {
 public:
     const char* what() const noexcept override {
         return "Ошибка отправки сообщения.";
@@ -22,13 +24,14 @@ public:
 };
 
 // Класс пользователя
+template <typename T>
 class User {
 public:
-    std::string login;
-    std::string password;
-    std::string name;
+   string login;
+    string password;
+    string name;
 
-    User(std::string login, std::string password, std::string name) {
+    User(string login, string password, string name) {
         this->login = login;
         this->password = password;
         this->name = name;
@@ -39,132 +42,174 @@ public:
 template <typename T>
 class Chat {
 private:
-    std::vector<T> users;
-    std::mutex chatMutex;
+    vector<T> users;
+    mutex chatMutex;
 
 public:
     // Регистрация нового пользователя
-    void registerUser(std::string login, std::string password, std::string name) {
-        std::lock_guard<std::mutex> lock(chatMutex);
+    void registerUser(string login, string password, string name) {
+        lock_guard<mutex> lock(chatMutex);
         // Проверяем, что пользователь с таким логином еще не зарегистрирован
-        if (std::find_if(users.begin(), users.end(), [&](const T& user) {
+        if (find_if(users.begin(), users.end(), [&](const T& user) {
             return user.login == login;
-        }) != users.end()) {
+            }) != users.end()) {
             throw AuthenticationException();
         }
 
         // Создаем нового пользователя и добавляем его в список
         T newUser(login, password, name);
         users.push_back(newUser);
-        std::cout << "Пользователь " << name << " успешно зарегистрирован." << std::endl;
+        cout << "Пользователь " << name << " успешно зарегистрирован." << endl;
     }
 
     // Аутентификация пользователя
-    bool login(std::string loginOrPassword) {
-        std::lock_guard<std::mutex> lock(chatMutex);
+    bool login(string loginOrPassword) {
+        lock_guard<mutex> lock(chatMutex);
         // Ищем пользователя с указанным логином или паролем
-        auto user = std::find_if(users.begin(), users.end(), [&](const T& user) {
+        auto user = find_if(users.begin(), users.end(), [&](const T& user) {
             return user.login == loginOrPassword || user.password == loginOrPassword;
-        });
+            });
 
         // Если пользователь найден, возвращаем true
         if (user != users.end()) {
-            std::cout << "Пользователь " << user->name << " успешно вошел в чат." << std::endl;
+            cout << "Пользователь " << user->name << " успешно вошел в чат." << endl;
             return true;
         }
 
         throw AuthenticationException();
     }
 
-    // Отправка сообщения всем пользователям
-    void sendMessage(std::string senderLoginOrPassword, std::string message) {
-        std::lock_guard<std::mutex> lock(chatMutex);
+    // Отправка сообщения конкретному пользователю
+    void sendMessageToUser(string senderLoginOrPassword, string receiverLoginOrPassword,string message) {
+       lock_guard<mutex> lock(chatMutex);
         // Ищем отправителя
-        auto sender = std::find_if(users.begin(), users.end(), [&](const T& user) {
+        auto sender = find_if(users.begin(), users.end(), [&](const T& user) {
             return user.login == senderLoginOrPassword || user.password == senderLoginOrPassword;
-        });
+            });
+
+        // Ищем получателя
+        auto receiver = find_if(users.begin(), users.end(), [&](const T& user) {
+            return user.login == receiverLoginOrPassword || user.password == receiverLoginOrPassword;
+            });
+
+        // Если отправитель и получатель найдены, отправляем сообщение
+        if (sender != users.end() && receiver != users.end()) {
+            cout << sender->name << " -> " << receiver->name << ": " << message << endl;
+        }
+        else {
+            throw MessageSendingException();
+        }
+    }
+
+    // Отправка сообщения всем пользователям
+    void sendMessage(string senderLoginOrPassword, string message) {
+       lock_guard<mutex> lock(chatMutex);
+        // Ищем отправителя
+        auto sender = find_if(users.begin(), users.end(), [&](const T& user) {
+
+            return user.login == senderLoginOrPassword || user.password == senderLoginOrPassword;
+            });
 
         // Если отправитель найден, отправляем сообщение всем пользователям
         if (sender != users.end()) {
             for (const auto& user : users) {
-                std::cout << sender->name << " -> " << user.name << ": " << message << std::endl;
+             cout << sender->name << " -> " << user.name << ": " << message << endl;
             }
-        } else {
+        }
+        else {
             throw MessageSendingException();
         }
+    }
+
+    // Получение списка пользователей
+    vector<T> getUsers() {
+        return users;
     }
 };
 
 int main() {
     // Используем шаблон для создания чата с пользователями User
-    Chat<User> chat;
+    Chat<User<string>> chat;
 
     try {
         // Регистрация пользователей
-        std::string login, password, name;
-        std::cout << "Регистрация первого пользователя:" << std::endl;
-        std::cout << "Введите логин: ";
-        std::getline(std::cin, login);
-        std::cout << "Введите пароль: ";
-        std::getline(std::cin, password);
-        std::cout << "Введите имя: ";
-        std::getline(std::cin, name);
+        string login, password, name;
 
+        // Регистрация первого пользователя
+        cout << "Регистрация первого пользователя:" << endl;
+        cout << "Введите логин: ";
+        getline(cin, login);
+        cout << "Введите пароль: ";
+        getline(cin, password);
+        cout << "Введите имя: ";
+        getline(cin, name);
         chat.registerUser(login, password, name);
 
-        std::cout << "Регистрация второго пользователя:" << std::endl;
-        std::cout << "Введите логин: ";
-        std::getline(std::cin, login);
-        std::cout << "Введите пароль: ";
-        std::getline(std::cin, password);
-        std::cout << "Введите имя: ";
-        std::getline(std::cin, name);
+        // Регистрация второго пользователя
+        cout << "Регистрация второго пользователя:" << endl;
+        cout << "Введите логин: ";
+        getline(cin, login);
+        cout << "Введите пароль: ";
+        getline(cin, password);
+        cout << "Введите имя: ";
+        getline(cin, name);
         chat.registerUser(login, password, name);
 
-        std::cout << "Регистрация третьего пользователя:" << std::endl;
-        std::cout << "Введите логин: ";
-        std::getline(std::cin, login);
-        std::cout << "Введите пароль: ";
-        std::getline(std::cin, password);
-        std::cout << "Введите имя: ";
-        std::getline(std::cin, name);
+        // Регистрация третьего пользователя
+        cout << "Регистрация третьего пользователя:" << endl;
+        cout << "Введите логин: ";
+        getline(cin, login);
+        cout << "Введите пароль: ";
+        getline(cin, password);
+        cout << "Введите имя: ";
+        getline(cin, name);
         chat.registerUser(login, password, name);
 
-        // Вход в чат
-        std::cout << "Вход в чат первого пользователя:" << std::endl;
-        std::cout << "Введите логин или пароль: ";
-        std::getline(std::cin, login);
-        if (chat.login(login)) {
-            std::cout << "Введите сообщение: ";
-            std::getline(std::cin, name);
-            chat.sendMessage(login, name);
-        }
+        // Выбор отправки сообщения
+        std::string senderLoginOrPassword, receiverLoginOrPassword, message;
+        int choice;
+        do {
+            cout << "Выберите действие:" << endl;
+            cout << "1. Отправить сообщение конкретному пользователю" << endl;
+            cout << "2. Отправить сообщение всем пользователям" << endl;
+            cout << "3. Выйти" << endl;
+            cout << "Ваш выбор: ";
+            cin >> choice;
+            cin.ignore(); // Очищаем буфер ввода
 
-        std::cout << "Вход в чат второго пользователя:" << std::endl;
-        std::cout << "Введите логин или пароль: ";
-        std::getline(std::cin, login);
-        if (chat.login(login)) {
-            std::cout << "Введите сообщение: ";
-            std::getline(std::cin, name);
-            chat.sendMessage(login, name);
-        }
+            switch (choice) {
+            case 1:
+                cout << "Введите логин или пароль отправителя: ";
+                getline(cin, senderLoginOrPassword);
+                cout << "Введите логин или пароль получателя: ";
+                getline(cin, receiverLoginOrPassword);
+                cout << "Введите сообщение: ";
+                getline(cin, message);
+                chat.sendMessageToUser(senderLoginOrPassword, receiverLoginOrPassword, message);
+                break;
+            case 2:
+                cout << "Введите логин или пароль отправителя: ";
+                getline(cin, senderLoginOrPassword);
+                cout << "Введите сообщение: ";
+                getline(cin, message);
+                chat.sendMessage(senderLoginOrPassword, message);
+                break;
+            case 3:
+                cout << "Выход из программы." << endl;
+                break;
+            default:
+              cout << "Неверный выбор. Попробуйте еще раз." << endl;
+                break;
+            }
+        } while (choice != 3);
 
-        std::cout << "Вход в чат третьего пользователя:" << std::endl;
-        std::cout << "Введите логин или пароль: ";
-        std::getline(std::cin, login);
-        if (chat.login(login)) {
-            std::cout << "Введите сообщение: ";
-            std::getline(std::cin, name);
-            chat.sendMessage(login, name);
-        }
-    } catch (const AuthenticationException& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const MessageSendingException& e) {
-        std::cerr << e.what() << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << "Произошла ошибка: " << e.what() << std::endl;
+    }
+    catch (const AuthenticationException& e) {
+        cerr << e.what() << endl;
+    }
+    catch (const MessageSendingException& e) {
+       cerr << e.what() << endl;
     }
 
     return 0;
 }
-
