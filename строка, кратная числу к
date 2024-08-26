@@ -1,0 +1,33 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+bool IsKPeriodic(const string& str, int k) {
+    // Проверяем, что k больше 0 и длина строки делится на k
+    if (k <= 0 || str.length() % k != 0) {
+        return false;
+    }
+
+    // Определяем длину подстроки
+    int subStrLength = str.length() / k;
+    string subStr = str.substr(0, subStrLength); // Первая подстрока
+
+    // Проверяем, равны ли все подстроки, извлеченные из str
+    for (int i = 1; i < k; i++) {
+        if (str.substr(i * subStrLength, subStrLength) != subStr) {
+            return false; // Если не равны, возвращаем false
+        }
+    }
+
+    return true; // Если все подстроки равны, возвращаем true
+}
+
+int main() {
+    string s1 = "abcabcabcabc";
+    string s2 = "abcabcabcad";
+
+    cout << IsKPeriodic(s1, 3) << endl; // Вывод: 1 (true)
+    cout << IsKPeriodic(s2, 3) << endl; // Вывод: 0 (false)
+
+    return 0;
+}
