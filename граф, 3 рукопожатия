@@ -1,0 +1,70 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_set>
+
+using namespace std;
+
+// Структура для хранения информации о человеке
+struct Person {
+    string name;
+    vector<int> friends; // Индексы друзей в векторе people
+};
+
+// Функция, находящая все пары знакомств через три рукопожатия
+void findThreeHandshakes(const vector<Person>& people) {
+    int n = people.size();
+    vector<vector<bool>> adjacency(n, vector<bool>(n, false)); // Матрица смежности
+
+    // Заполнение матрицы смежности
+    for (int i = 0; i < n; i++) {
+        for (const int friend_idx : people[i].friends) {
+            adjacency[i][friend_idx] = adjacency[friend_idx][i] = true;
+        }
+    }
+
+    // Поиск пар знакомств через три рукопожатия
+    unordered_set<int> visited;
+    for (int i = 0; i < n; i++) {
+        queue<int> q;
+        q.push(i);
+        visited.insert(i);
+        int level = 0;
+
+        while (!q.empty()) {
+            int size = q.size();
+            for (int j = 0; j < size; j++) {
+                int curr = q.front();
+                q.pop();
+
+                for (int k = 0; k < n; k++) {
+                    if (adjacency[curr][k] && visited.find(k) == visited.end()) {
+                        if (level == 2) {
+                            cout << people[i].name << " is connected to " << people[k].name << " through 3 handshakes" << endl;
+                        } else {
+                            q.push(k);
+                            visited.insert(k);
+                        }
+                    }
+                }
+            }
+            level++;
+        }
+
+        visited.clear();
+    }
+}
+
+int main() {
+    vector<Person> people = {
+        {"Alice", {1, 2, 3}},
+        {"Bob", {0, 2, 4}},
+        {"Charlie", {0, 1, 4}},
+        {"David", {0}},
+        {"Eve", {1, 2}}
+    };
+
+    findThreeHandshakes(people);
+
+    return 0;
+}
