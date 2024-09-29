@@ -2,7 +2,7 @@
 #define USER_H
 
 #include <string>
-iostream
+#include <iostream>
 
 // Класс пользователя
 template <typename T>
