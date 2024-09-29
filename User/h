@@ -2,20 +2,17 @@
 #define USER_H
 
 #include <string>
-using namespace std;
 
 // Класс пользователя
 template <typename T>
 class User {
 public:
-    string login;
-    string password;
-    string name;
+    std::string login;
+    std::string password;
+    std::string name;
 
-    User(string login, string password, string name) {
-        this->login = login;
-        this->password = password;
-        this->name = name;
-    }
+    User(const std::string& login, const std::string& password, const std::string& name)
+        : login(login), password(password), name(name) {}
 };
+
 #endif // USER_H
