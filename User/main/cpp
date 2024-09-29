@@ -1,0 +1,47 @@
+#include "Chat.h"
+#include <iostream>
+using namespace  std;
+
+int main() {
+    Chat<User<string>> chat;
+
+    try {
+        // Регистрация пользователей
+        chat.registerUser("user1", "password1", "User 1");
+        chat.registerUser("user2", "password2", "User 2");
+        chat.registerUser("user3", "password3", "User 3");
+
+        // Вход в чат
+        if (chat.loginUser("user1")) {
+            // Отправка сообщений
+            chat.sendMessageToUser("user2", "Привет, User 2!");
+            chat.sendMessage("Всем привет!");
+
+            // История сообщений
+            cout << "История сообщений:" << endl;
+            for (const auto& message : chat.getMessageHistory()) {
+                cout << message << endl;
+            }
+        }
+
+        if (chat.loginUser("user2")) {
+            // Отправка сообщений
+            chat.sendMessageToUser("user1", "Привет, User 1!");
+            chat.sendMessage("Ответное сообщение всем!");
+
+            // История сообщений
+            cout << "История сообщений:" << endl;
+            for (const auto& message : chat.getMessageHistory()) {
+                cout << message << endl;
+            }
+        }
+    }
+    catch (const AuthenticationException& e) {
+        cerr << e.what() << endl;
+    }
+    catch (const MessageSendingException& e) {
+        cerr << e.what() << endl;
+    }
+
+    return 0;
+}
