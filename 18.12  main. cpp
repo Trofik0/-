@@ -1,8 +1,9 @@
-#include <iostream>
 #include "User.h"
 #include <iostream>
 #include "User.h"
 #include "Message.h"
+
+using namespace std;
 
 int main() {
     // Загрузка объектов из файлов
@@ -11,8 +12,8 @@ int main() {
 
     // Вывод информации
 
-    std::cout << "User: " << user._name << ", " << user._login << ", " << user._pass << std::endl;
-    std::cout << "Message: " << message._text << ", " << message._sender << ", " << message._receiver << std::endl;
+    cout << "User: " << user._name << ", " << user._login << ", " << user._pass << endl;
+    cout << "Message: " << message._text << ", " << message._sender << ", " << message._receiver << endl;
 
     // Сохранение объектов в файлы
     user._name = "John Doe";
