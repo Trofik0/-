@@ -1,1 +1,29 @@
+#include <iostream>
+#include "User.h"
+#include <iostream>
+#include "User.h"
+#include "Message.h"
 
+int main() {
+    // Загрузка объектов из файлов
+    User user = User::loadFromFile();
+    Message message = Message::loadFromFile();
+
+    // Вывод информации
+
+    std::cout << "User: " << user._name << ", " << user._login << ", " << user._pass << std::endl;
+    std::cout << "Message: " << message._text << ", " << message._sender << ", " << message._receiver << std::endl;
+
+    // Сохранение объектов в файлы
+    user._name = "John Doe";
+    user._login = "johndoe";
+    user._pass = "password123";
+    user.saveToFile();
+
+    message._text = "Hello, world!";
+    message._sender = "johndoe";
+    message._receiver = "janedoe";
+    message.saveToFile();
+
+    return 0;
+}
