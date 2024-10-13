@@ -1,0 +1,17 @@
+#ifndef USER_H
+#define USER_H
+
+#include <string>
+using namespace std;
+
+class User {
+public:
+    string _name;
+    string _login;
+    string _pass;
+
+    void saveToFile();
+    static User loadFromFile();
+};
+
+#endif // USER_H
