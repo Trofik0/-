@@ -1,0 +1,30 @@
+#include "User.h"
+#include <fstream>
+#include <filesystem>
+using namespace std;
+
+void User::saveToFile() {
+    ofstream userFile("user.txt", ios::trunc);
+    if (userFile.is_open()) {
+        userFile << _name << "," << _login << "," << _pass << endl;
+        userFile.close();
+        filesystem::permissions("user.txt", filesystem::perms::owner_all);
+    }
+}
+
+User User::loadFromFile() {
+    User user;
+    ifstream userFile("user.txt");
+    if (userFile.is_open()) {
+        string line;
+        getline(userFile, line);
+        size_t pos = line.find(",");
+        user._name = line.substr(0, pos);
+        line = line.substr(pos + 1);
+        pos = line.find(",");
+        user._login = line.substr(0, pos);
+        user._pass = line.substr(pos + 1);
+        userFile.close();
+    }
+    return user;
+}
