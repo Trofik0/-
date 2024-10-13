@@ -1,0 +1,31 @@
+#include "Message.h"
+#include <fstream>
+#include <filesystem>
+
+using namespace std;
+
+void Message::saveToFile() {
+  ofstream messageFile("message.txt", ios::trunc);
+    if (messageFile.is_open()) {
+        messageFile << _text << "," << _sender << "," << _receiver << endl;
+        messageFile.close();
+        filesystem::permissions("message.txt", filesystem::perms::owner_all);
+    }
+}
+
+Message Message::loadFromFile() {
+    Message message;
+    ifstream messageFile("message.txt");
+    if (messageFile.is_open()) {
+        string line;
+        getline(messageFile, line);
+        size_t pos = line.find(",");
+        message._text = line.substr(0, pos);
+        line = line.substr(pos + 1);
+        pos = line.find(",");
+        message._sender = line.substr(0, pos);
+        message._receiver = line.substr(pos + 1);
+        messageFile.close();
+    }
+    return message;
+}
